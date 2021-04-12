@@ -513,7 +513,7 @@ class MPU9250:
 		#self.Bus.write_byte_data(self.cfg.Address, subaddress, data)
 		buffer = bytearray(1)
 		buffer[0] = subaddress
-		buffer.extend(data)
+		buffer.extend(bytes(data))
 		with self.i2c_device as i2c:
 			i2c.write(buffer)
 		
