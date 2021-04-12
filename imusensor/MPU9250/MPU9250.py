@@ -9,6 +9,8 @@ import smbus
 import busio
 import board
 import adafruit_tca9548a
+from adafruit_bus_device.i2c_device import I2CDevice
+from adafruit_register.i2c_struct import Struct, UnaryStruct
 
 from imusensor.MPU9250 import config
 
@@ -28,6 +30,8 @@ class MPU9250:
 		self.Bus = bus
 		self.tca = adafruit_tca9548a.TCA9548A(busio.I2C(board.SCL, board.SDA))
 		self.cfg.Channel = channel
+		self.i2c_device = I2CDevice(self.tca[channel], address)
+		self.buffer = bytearray(2)
 		self.AccelBias = np.array([0.0, 0.0, 0.0])
 		self.Accels = np.array([1.0, 1.0, 1.0])
 		self.MagBias = np.array([0.0, 0.0, 0.0])
@@ -508,7 +512,11 @@ class MPU9250:
 	def __writeRegister(self, subaddress, data):
 
 		#self.Bus.write_byte_data(self.cfg.Address, subaddress, data)
-		self.tca[self.cfg.Channel].writeto(self.cfg.Address, bytes(data), start=subaddress, stop=False)
+		self.buffer[0] = subaddress
+		self.buffer[1] = data
+		with self.i2c_device as i2c:
+			i2c.write(self.buffer)
+		
 		time.sleep(0.01)
 
 		val = self.__readRegisters(subaddress,1)
@@ -520,9 +528,11 @@ class MPU9250:
 	def __readRegisters(self, subaddress, count):
 
 		#data = self.Bus.read_i2c_block_data(self.cfg.Address, subaddress, count)
-		data = bytearray(2)
-		self.tca[self.cfg.Channel].readfrom_into(self.cfg.Address, data, start=subaddress)
-		return data
+		self.buffer[0] = register
+		with self.i2c_device as i2c:
+			i2c.write_then_readinto(self.buffer, self.buffer, out_end=1, in_start=1)
+		return self.buffer[1]
+		return self.buffer[1]
 
 	def __writeAK8963Register(self, subaddress, data):
 
