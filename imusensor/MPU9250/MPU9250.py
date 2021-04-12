@@ -528,7 +528,7 @@ class MPU9250:
 	def __readRegisters(self, subaddress, count):
 
 		#data = self.Bus.read_i2c_block_data(self.cfg.Address, subaddress, count)
-		self.buffer[0] = register
+		self.buffer[0] = subaddress
 		with self.i2c_device as i2c:
 			i2c.write_then_readinto(self.buffer, self.buffer, out_end=1, in_start=1)
 		return self.buffer[1]
