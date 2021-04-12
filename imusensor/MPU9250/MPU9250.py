@@ -520,6 +520,7 @@ class MPU9250:
 		time.sleep(0.01)
 
 		val = self.__readRegisters(subaddress,1)
+		print(val)
 		if val[0] != data:
 			print ("It did not write the {0} to the register {1}".format(data, subaddress))
 			return -1
