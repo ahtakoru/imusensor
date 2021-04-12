@@ -6,9 +6,6 @@ from json import JSONEncoder
 import json
 import smbus
 
-import busio
-import board
-import adafruit_tca9548a
 from adafruit_bus_device.i2c_device import I2CDevice
 from adafruit_register.i2c_struct import Struct, UnaryStruct
 
@@ -27,7 +24,6 @@ class MPU9250:
 
 		self.cfg = config.getConfigVals()
 		self.cfg.Address = address
-# 		self.Bus = bus
 		self.cfg.Channel = channel
 		self.i2c_device = I2CDevice(bus[channel], address)
 		self.AccelBias = np.array([0.0, 0.0, 0.0])
