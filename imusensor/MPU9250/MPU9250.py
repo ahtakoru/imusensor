@@ -6,25 +6,28 @@ from json import JSONEncoder
 import json
 import smbus
 
+import busio
+import board
+import adafruit_tca9548a
+
 from imusensor.MPU9250 import config
 
 class MPU9250:
 	"""
 	An interface between MPU9250 and rpi using I2C protocol
-
 	It has various fuctions from caliberation to computing orientation
-
 	"""
 
-	def __init__(self, bus, address):
+	def __init__(self, bus, address, channel):
 		"""
 		Sets up the basic variables like scale and bias of sensors.
-
 		"""
 
 		self.cfg = config.getConfigVals()
 		self.cfg.Address = address
 		self.Bus = bus
+		self.tca = adafruit_tca9548a.TCA9548A(busio.I2C(board.SCL, board.SDA))
+		self.cfg.Channel = channel
 		self.AccelBias = np.array([0.0, 0.0, 0.0])
 		self.Accels = np.array([1.0, 1.0, 1.0])
 		self.MagBias = np.array([0.0, 0.0, 0.0])
@@ -35,10 +38,8 @@ class MPU9250:
 	def begin(self):
 		"""
 		Initializes various registers of MPU9250.
-
 		It also sets ranges of accelerometer and gyroscope and also the frequency of low 
 		pass filter.
-
 		"""
 
 		self.__writeRegister(self.cfg.PowerManagement1, self.cfg.ClockPLL)
@@ -96,12 +97,10 @@ class MPU9250:
 
 	def setSRD(self, data):
 		"""Sets the frequency of getting data
-
 		Parameters
 		----------
 		data : int
 			This number is between 1 to 19 and decides the rate of sample collection
-
 		"""
 
 		self.CurrentSRD = data
@@ -124,7 +123,6 @@ class MPU9250:
 
 	def setAccelRange(self, accelRange):
 		"""Sets the range of accelerometer
-
 		Parameters
 		----------
 		accelRange : str
@@ -133,7 +131,6 @@ class MPU9250:
 			4g  -> AccelRangeSelect4G
 			8g  -> AccelRangeSelect8G
 			16g -> AccelRangeSelect16G
-
 		"""
 		
 		try:
@@ -148,7 +145,6 @@ class MPU9250:
 
 	def setGyroRange(self, gyroRange):
 		"""Sets the range of gyroscope
-
 		Parameters
 		----------
 		gyroRange : str
@@ -157,9 +153,7 @@ class MPU9250:
 			500DPS  -> GyroRangeSelect500DPS
 			1000DPS -> GyroRangeSelect1000DPS
 			2000DPS -> GyroRangeSelect2000DPS
-
 			DPS means degrees per freedom
-
 		"""
 
 		try:
@@ -174,9 +168,7 @@ class MPU9250:
 
 	def setLowPassFilterFrequency(self, frequency):
 		"""Sets the frequency of internal low pass filter
-
 		This is common for both accelerometer and gyroscope
-
 		Parameters
 		----------
 		frequency : str
@@ -185,9 +177,7 @@ class MPU9250:
 			500DPS  -> GyroRangeSelect500DPS
 			1000DPS -> GyroRangeSelect1000DPS
 			2000DPS -> GyroRangeSelect2000DPS
-
 			DPS means degrees per freedom
-
 		"""
 
 		try:
@@ -201,7 +191,6 @@ class MPU9250:
 
 	def readRawSensor(self):
 		"""Reading raw values of accelerometer, gyroscope and magnetometer
-
 		"""
 
 		data = self.__readRegisters(self.cfg.AccelOut, 20)
@@ -217,9 +206,7 @@ class MPU9250:
 
 	def readSensor(self):
 		"""Reading values of accelerometer, gyroscope and magnetometer 
-
 		The functions finds values by applying caliberation values.
-
 		"""
 
 		data = self.__readRegisters(self.cfg.AccelOut, 21)
@@ -243,7 +230,6 @@ class MPU9250:
 
 	def caliberateGyro(self):
 		"""Calibrates gyroscope by finding the bias sets the gyro bias
-
 		"""
 
 		currentGyroRange = self.GyroRange
@@ -352,10 +338,8 @@ class MPU9250:
 		
 		This function uses basic methods like averaging and scaling to find the hard iron
 		and soft iron effects.
-
 		Note: Make sure you rotate the sensor in 8 shape and cover all the 
 		pitch and roll angles.
-
 		"""
 
 		currentSRD = self.CurrentSRD
@@ -380,10 +364,8 @@ class MPU9250:
 		
 		This function uses ellipsoid fitting to get an estimate of the bias and
 		transformation matrix required for mag data
-
 		Note: Make sure you rotate the sensor in 8 shape and cover all the 
 		pitch and roll angles.
-
 		"""
 
 		currentSRD = self.CurrentSRD
@@ -447,14 +429,12 @@ class MPU9250:
 
 	def saveCalibDataToFile(self, filePath):
 		""" Save the caliberation vaslues
-
 		Parameters
 		----------
 		filePath : str
 			Make sure the folder exists before giving the input.  The path 
 			has to be absolute.
 			Otherwise it doesn't save the values.
-
 		"""
 
 		calibVals = {}
@@ -481,7 +461,6 @@ class MPU9250:
 
 	def loadCalibDataFromFile(self, filePath):
 		""" Save the caliberation vaslues
-
 		Parameters
 		----------
 		filePath : str
@@ -507,7 +486,6 @@ class MPU9250:
 
 	def computeOrientation(self):
 		""" Computes roll, pitch and yaw
-
 		The function uses accelerometer and magnetometer values
 		to estimate roll, pitch and yaw. These values could be 
 		having some noise, hence look at kalman and madgwick 
@@ -529,7 +507,8 @@ class MPU9250:
 
 	def __writeRegister(self, subaddress, data):
 
-		self.Bus.write_byte_data(self.cfg.Address, subaddress, data)
+		#self.Bus.write_byte_data(self.cfg.Address, subaddress, data)
+		self.tca[cfg.Channel].writeto(self.cfg.Address, data, stop=False)
 		time.sleep(0.01)
 
 		val = self.__readRegisters(subaddress,1)
@@ -540,7 +519,9 @@ class MPU9250:
 
 	def __readRegisters(self, subaddress, count):
 
-		data = self.Bus.read_i2c_block_data(self.cfg.Address, subaddress, count)
+		#data = self.Bus.read_i2c_block_data(self.cfg.Address, subaddress, count)
+		data = bytearray(2)
+		self.tca[cfg.Channel].readfrom_into(self.cfg.Address, data)
 		return data
 
 	def __writeAK8963Register(self, subaddress, data):
