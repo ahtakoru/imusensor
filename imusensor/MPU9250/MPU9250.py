@@ -511,9 +511,9 @@ class MPU9250:
 	def __writeRegister(self, subaddress, data):
 
 		#self.Bus.write_byte_data(self.cfg.Address, subaddress, data)
-		buffer = bytearray(1)
+		buffer = bytearray(2)
 		buffer[0] = subaddress
-		buffer.extend(bytes(data))
+		buffer[1] = data
 		print('I am writing')
 		print(buffer)
 		with self.i2c_device as i2c:
