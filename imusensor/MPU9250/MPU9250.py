@@ -508,7 +508,7 @@ class MPU9250:
 	def __writeRegister(self, subaddress, data):
 
 		#self.Bus.write_byte_data(self.cfg.Address, subaddress, data)
-		self.tca[self.cfg.Channel].writeto(subaddress, bytes(data), stop=False)
+		self.tca[self.cfg.Channel].writeto(self.cfg.Address, bytes(data), start=subaddress, stop=False)
 		time.sleep(0.01)
 
 		val = self.__readRegisters(subaddress,1)
@@ -521,7 +521,7 @@ class MPU9250:
 
 		#data = self.Bus.read_i2c_block_data(self.cfg.Address, subaddress, count)
 		data = bytearray(2)
-		self.tca[self.cfg.Channel].readfrom_into(subaddress, data)
+		self.tca[self.cfg.Channel].readfrom_into(self.cfg.Address, data, start=subaddress)
 		return data
 
 	def __writeAK8963Register(self, subaddress, data):
