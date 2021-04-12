@@ -508,7 +508,7 @@ class MPU9250:
 	def __writeRegister(self, subaddress, data):
 
 		#self.Bus.write_byte_data(self.cfg.Address, subaddress, data)
-		self.tca[self.cfg.Channel].writeto(self.cfg.Address, data, stop=False)
+		self.tca[self.cfg.Channel].writeto(self.cfg.Address, bytes(data), stop=False)
 		time.sleep(0.01)
 
 		val = self.__readRegisters(subaddress,1)
