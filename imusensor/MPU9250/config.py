@@ -10,6 +10,7 @@ def getConfigVals():
 	# declaring register values. Don't change them as long as you are damn sure.
 
 	cfg.Address = 0x68
+	cfg.Channel = 0
 
 	cfg.AccelOut = 0x3B # getting the accelerometer data.
 	cfg.ExtSensData00 = 0x49
