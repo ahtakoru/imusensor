@@ -514,13 +514,14 @@ class MPU9250:
 		buffer = bytearray(1)
 		buffer[0] = subaddress
 		buffer.extend(bytes(data))
+		print('I am writing')
+		print(buffer)
 		with self.i2c_device as i2c:
 			i2c.write(buffer)
 		
 		time.sleep(0.01)
 
 		val = self.__readRegisters(subaddress,1)
-		print(val)
 		if val[0] != data:
 			print ("It did not write the {0} to the register {1}".format(data, subaddress))
 			return -1
@@ -533,7 +534,6 @@ class MPU9250:
 		buffer[0] = subaddress
 		with self.i2c_device as i2c:
 			i2c.write_then_readinto(buffer, buffer, out_end=1+count, in_start=1)
-		print(buffer)
 		return buffer[1:1+count]
 
 	def __writeAK8963Register(self, subaddress, data):
