@@ -11,7 +11,7 @@ from imusensor.filters import kalman
 
 
 # initializing publisher
-host = '192.168.0.104'
+host = '192.168.1.7'
 port = 8358
 url = 'tcp://'+host+':'+str(port)
 context = zmq.Context()
@@ -22,9 +22,9 @@ sensorfusion = madgwick.Madgwick(0.1)
 
 kalman_filter = kalman.Kalman()
 
+tca = adafruit_tca9548a.TCA9548A(busio.I2C(board.SCL, board.SDA))
 address = 0x68
-bus = smbus.SMBus(1)
-imu = MPU9250.MPU9250(bus, address)
+imu = MPU9250.MPU9250(tca, address, 0)
 imu.begin()
 # imu.caliberateAccelerometer()
 # print ("Acceleration calib successful")
