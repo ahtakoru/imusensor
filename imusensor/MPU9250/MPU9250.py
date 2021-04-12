@@ -27,7 +27,7 @@ class MPU9250:
 
 		self.cfg = config.getConfigVals()
 		self.cfg.Address = address
-		self.Bus = bus
+# 		self.Bus = bus
 		self.cfg.Channel = channel
 		self.i2c_device = I2CDevice(bus[channel], address)
 		self.AccelBias = np.array([0.0, 0.0, 0.0])
