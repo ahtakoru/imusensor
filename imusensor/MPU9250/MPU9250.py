@@ -28,9 +28,8 @@ class MPU9250:
 		self.cfg = config.getConfigVals()
 		self.cfg.Address = address
 		self.Bus = bus
-		self.tca = adafruit_tca9548a.TCA9548A(busio.I2C(board.SCL, board.SDA))
 		self.cfg.Channel = channel
-		self.i2c_device = I2CDevice(self.tca[channel], address)
+		self.i2c_device = I2CDevice(bus[channel], address)
 		self.AccelBias = np.array([0.0, 0.0, 0.0])
 		self.Accels = np.array([1.0, 1.0, 1.0])
 		self.MagBias = np.array([0.0, 0.0, 0.0])
