@@ -520,7 +520,7 @@ class MPU9250:
 		time.sleep(0.01)
 
 		val = self.__readRegisters(subaddress,1)
-		if val[0] != data:
+		if val != data:
 			print ("It did not write the {0} to the register {1}".format(data, subaddress))
 			return -1
 		return 1
@@ -532,7 +532,6 @@ class MPU9250:
 		with self.i2c_device as i2c:
 			i2c.write_then_readinto(self.buffer, self.buffer, out_end=1, in_start=1)
 		return self.buffer[1]
-		return self.buffer[1]
 
 	def __writeAK8963Register(self, subaddress, data):
 
@@ -543,7 +542,7 @@ class MPU9250:
 
 		val = self.__readAK8963Registers(subaddress, 1)
 
-		if val[0] != data:
+		if val != data:
 			print ("looks like it did not write properly")
 		return 1
 
