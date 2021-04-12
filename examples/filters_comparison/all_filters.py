@@ -4,6 +4,9 @@ import time
 import smbus
 import numpy as np
 import zmq
+import busio
+import board
+import adafruit_tca9548a
 
 from imusensor.MPU9250 import MPU9250
 from imusensor.filters import madgwick
@@ -11,7 +14,7 @@ from imusensor.filters import kalman
 
 
 # initializing publisher
-host = '192.168.1.7'
+host = '192.168.1.8'
 port = 8358
 url = 'tcp://'+host+':'+str(port)
 context = zmq.Context()
