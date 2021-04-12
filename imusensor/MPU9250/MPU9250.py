@@ -533,7 +533,7 @@ class MPU9250:
 		buffer[0] = subaddress
 		with self.i2c_device as i2c:
 			i2c.write_then_readinto(buffer, buffer, out_end=count, in_start=1)
-		print(buffer[1:count])
+		print(buffer)
 		return buffer[1:count]
 
 	def __writeAK8963Register(self, subaddress, data):
