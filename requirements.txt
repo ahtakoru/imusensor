@@ -2,4 +2,6 @@
 smbus
 numpy
 easydict
-
+adafruit-circuitpython-tca9548a
+busio
+board
