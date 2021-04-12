@@ -31,7 +31,6 @@ class MPU9250:
 		self.tca = adafruit_tca9548a.TCA9548A(busio.I2C(board.SCL, board.SDA))
 		self.cfg.Channel = channel
 		self.i2c_device = I2CDevice(self.tca[channel], address)
-		self.buffer = bytearray(2)
 		self.AccelBias = np.array([0.0, 0.0, 0.0])
 		self.Accels = np.array([1.0, 1.0, 1.0])
 		self.MagBias = np.array([0.0, 0.0, 0.0])
@@ -512,15 +511,16 @@ class MPU9250:
 	def __writeRegister(self, subaddress, data):
 
 		#self.Bus.write_byte_data(self.cfg.Address, subaddress, data)
-		self.buffer[0] = subaddress
-		self.buffer[1] = data
+		buffer = bytearray(1)
+		buffer[0] = subaddress
+		buffer.extend(data)
 		with self.i2c_device as i2c:
-			i2c.write(self.buffer)
+			i2c.write(buffer)
 		
 		time.sleep(0.01)
 
 		val = self.__readRegisters(subaddress,1)
-		if val != data:
+		if val[0] != data:
 			print ("It did not write the {0} to the register {1}".format(data, subaddress))
 			return -1
 		return 1
@@ -528,10 +528,11 @@ class MPU9250:
 	def __readRegisters(self, subaddress, count):
 
 		#data = self.Bus.read_i2c_block_data(self.cfg.Address, subaddress, count)
-		self.buffer[0] = subaddress
+		buffer = bytearray(1+count)
+		buffer[0] = subaddress
 		with self.i2c_device as i2c:
-			i2c.write_then_readinto(self.buffer, self.buffer, out_end=1, in_start=1)
-		return self.buffer[1]
+			i2c.write_then_readinto(self.buffer, self.buffer, out_end=count, in_start=1)
+		return bytes(buffer[1:count])
 
 	def __writeAK8963Register(self, subaddress, data):
 
@@ -542,7 +543,7 @@ class MPU9250:
 
 		val = self.__readAK8963Registers(subaddress, 1)
 
-		if val != data:
+		if val[0] != data:
 			print ("looks like it did not write properly")
 		return 1
 
