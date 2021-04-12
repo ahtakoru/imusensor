@@ -34,13 +34,16 @@ The below code is a basic starter for the library
 import os
 import sys
 import time
-import smbus
+import busio
+import board
+import adafruit_tca9548a
 
 from imusensor.MPU9250 import MPU9250
 
+tca = adafruit_tca9548a.TCA9548A(busio.I2C(board.SCL, board.SDA))
 address = 0x68
-bus = smbus.SMBus(1)
-imu = MPU9250.MPU9250(bus, address)
+tca_channel = 0
+imu = MPU9250.MPU9250(tca, address, tca_channel)
 imu.begin()
 # imu.caliberateGyro()
 # imu.caliberateAccelerometer()
